@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 VUContacts. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
 //! Project version number for OAuthSDK.
 FOUNDATION_EXPORT double OAuthSDKVersionNumber;
@@ -16,4 +16,4 @@ FOUNDATION_EXPORT const unsigned char OAuthSDKVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <OAuthSDK/PublicHeader.h>
 
-
+#import <OAuthSDK/HMAC-SHA1.h>

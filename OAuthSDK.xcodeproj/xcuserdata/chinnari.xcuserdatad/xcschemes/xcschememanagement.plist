@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>Example.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>OAuthSDK.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -18,6 +23,16 @@
 			<true/>
 		</dict>
 		<key>9016455D1AE3976C00163E3E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>90FAB5361AE3B9FB001D3032</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>90FAB54A1AE3B9FB001D3032</key>
 		<dict>
 			<key>primary</key>
 			<true/>

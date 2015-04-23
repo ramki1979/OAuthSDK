@@ -83,11 +83,15 @@ public class OAuthWebView: UIView {
         }
         posAnim.duration = 0.3
         posAnim.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
-        layer.addAnimation(posAnim, forKey: "position")
-        
         if reverse {
-            removeFromSuperview()
+            posAnim.delegate = self
         }
+        
+        layer.addAnimation(posAnim, forKey: "position")
+    }
+    
+    public override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
+        self.removeFromSuperview()
     }
     
     func navigateBack() {

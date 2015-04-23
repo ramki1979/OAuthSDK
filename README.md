@@ -39,12 +39,14 @@ delegate = self
 
 //  Add Default API Endpoints here...
 let requestToken = ["method":"POST", "url":"https://api.twitter.com/oauth/request_token", "format":"&=", "oauth_callback":"https://127.0.0.1:9000/oauth1/twitter/"]
-let authenticateUser = ["url":"https://api.twitter.com/oauth/authorize"]
+let authenticateUser = ["url":"https://api.twitter.com/oauth/authorize", "oauth_token":""]
 let authenticateCode = ["method":"POST","url":"https://api.twitter.com/oauth/access_token", "format":"&="]
+let profile = ["method":"GET", "path":"/users/show.json", "screen_name":""]
 
 addEndPoint(OAuthEndPointKeys.RequestTokenURL.rawValue, value: requestToken)
 addEndPoint(OAuthEndPointKeys.AuthenticateUserURL.rawValue, value: authenticateUser)
-addEndPoint(OAuthEndPointKeys.AuthenticateCodeURL.rawValue, value: authenticateCode)
+addEndPoint(OAuthEndPointKeys.AuthenticateUserCodeForAccessTokenURL.rawValue, value: authenticateRequestTokenForAccessToken)
+addEndPoint(OAuthEndPointKeys.UserProfileURL.rawValue, value: profile)
 
 }
 }
@@ -93,10 +95,10 @@ let validateToken = ["method":"GET","url":"https://www.googleapis.com/oauth2/v1/
 let profile = ["method":"GET", "path":"/about", "access_token":""]
 
 addEndPoint(OAuthEndPointKeys.AuthenticateUserURL.rawValue, value: authenticateUser)
-addEndPoint(OAuthEndPointKeys.AuthenticateCodeURL.rawValue, value: authenticateCode)
+addEndPoint(OAuthEndPointKeys.AuthenticateUserCodeForAccessTokenURL.rawValue, value: authenticateCode)
 addEndPoint(OAuthEndPointKeys.RefreshAccessTokenURL.rawValue, value: refreshToken)
 addEndPoint(OAuthEndPointKeys.ValidateAccessTokenURL.rawValue, value: validateToken)
-addEndPoint(OAuthEndPointKeys.UserAccountInfoURL.rawValue, value: profile)
+addEndPoint(OAuthEndPointKeys.UserProfileURL.rawValue, value: profile)
 }
 }
 

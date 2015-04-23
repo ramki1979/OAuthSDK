@@ -32,7 +32,7 @@ class TwitterService: OAuth1 {
         let authenticateRequestTokenForAccessToken = ["method":"POST","url":"https://api.twitter.com/oauth/access_token", "format":"&="]
 //        let refreshToken = ["method":"POST","url":"https://www.googleapis.com/oauth2/v3/token","client_id":"","client_secret":"","refresh_token":"","grant_type":"refresh_token"]
 //        let validateToken = ["method":"GET","url":"https://www.googleapis.com/oauth2/v1/tokeninfo","access_token":""]
-        let profile = ["method":"GET", "path":"/users/show.json", "screen_name":""]
+        let profile = ["method":"GET", "path":"/users/show.json", "screen_name":"", "format":"json"]
         
         addEndPoint(OAuthEndPointKeys.RequestTokenURL.rawValue, value: requestToken)
         addEndPoint(OAuthEndPointKeys.AuthenticateUserURL.rawValue, value: authenticateUser)

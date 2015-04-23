@@ -227,7 +227,7 @@ public class OAuth1: OAuthClient {
         
         //  sorting and making OAuth Base String for signature..
         if let val = params["path"] {
-            url = baseURL + val
+            url = (baseURL + val).stringByAddingPercentEncodingWithAllowedCharacters(OAuth1EncodingSet)!
         } else {
             url = params["url"]!.stringByAddingPercentEncodingWithAllowedCharacters(OAuth1EncodingSet)!
         }

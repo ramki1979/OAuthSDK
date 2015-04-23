@@ -133,8 +133,8 @@ public class OAuth2: OAuthClient {
                 keychainHelper.deleteKey(OAuthServiceName+" code", serviceId: nil)
                 encryptToKeyChain(OAuthServiceName+" refresh", data: refresh_token)
                 
-                //  Access user probile i.e /about API of Google Drive..
-                createDataTask(OAuthEndPointKeys.UserAccountInfoURL.rawValue)
+                //  Access user profile
+                createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
             }
         }
     }
@@ -173,7 +173,7 @@ public class OAuth2: OAuthClient {
         
         //  token is valid...
         OAuthState = .AccessToken
-        createDataTask(OAuthEndPointKeys.UserAccountInfoURL.rawValue)
+        //createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
     }
     
 }
@@ -193,7 +193,7 @@ extension OAuth2: OAuthWebResponse {
                     
                     // we got the code, lets authenticate the code, to get the access_token...
                     OAuthState = .AuthenticateCode
-                    createDataTask(OAuthEndPointKeys.AuthenticateCodeURL.rawValue)
+                    createDataTask(OAuthEndPointKeys.AuthenticateUserCodeForAccessTokenURL.rawValue)
                     
                 } else {
                     println("responseURL: \(url)")
@@ -231,13 +231,14 @@ extension OAuth2: NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
             responseData.removeValueForKey(path)
             
         } else {
-            println("oops no data found, for request: \(task.originalRequest.URL) -> \(error)")
+            if let delgate = delegate {
+                delgate.requestCompleteWithError(OAuthServiceName, path: path, response: responseError[path]!)
+            }
             return
         }
         
         switch OAuthState {
-            //  If everything gone well, then we have our access token ready to access the
-            //  google drive api
+            
         case .AuthenticateCode: fallthrough
         case .RefreshAccessToken:
             processAuthenticateTokenResponse(response! as! [String: AnyObject])

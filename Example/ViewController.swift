@@ -193,6 +193,8 @@ extension ViewController {
                 // The below set the respective URL that webview needs to load for user athentication...
                 gd.authenticationRequestURL(self.view)
                 
+            case .AccessToken:
+                showAlertView(title, message: "Already Authorized, You are ready to call \(title) REST API's")
             default: break
 
             }
@@ -215,7 +217,10 @@ extension ViewController {
                 // The below set the respective URL that webview needs to load for user athentication...
                 twt.authenticationRequestURL(self.view)
                 
-            default: twt.authenticationRequestURL(self.view)
+            case .AccessToken:
+                showAlertView(title, message: "Already Authorized, You are ready to call \(title) REST API's")
+                
+            default: break
                 
             }
             

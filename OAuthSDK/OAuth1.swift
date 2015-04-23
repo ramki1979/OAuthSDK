@@ -53,15 +53,41 @@ public class OAuth1: OAuthClient {
     private func authenticationRequestURL() {
         //  Authenticate user URL
         OAuthState = .AuthenticateUser
-        let params = OAuthEndPoints[OAuthEndPointKeys.AuthenticateUserURL.rawValue]!
-        OAuthURL = params["url"]! + "?oauth_token=" + valueForKey("oauth_token")
+        let params = resolveMissingUrlParams(OAuthEndPointKeys.AuthenticateUserURL.rawValue)
+        
+        var queryString = String()
+        
+        for (key, value) in params {
+            if queryString.isEmpty {
+                queryString += "?"
+            } else {
+                queryString += "&"
+            }
+            queryString += "\(key)=\(value)"
+        }
+        
+        OAuthURL = params["url"]! + queryString
         
         webView!.loadRequestURL(OAuthURL)
     }
     
+    private func resolveMissingUrlParams(endPointKey: String) -> [String: String] {
+        
+        var params = OAuthEndPoints[endPointKey]!
+        
+        for (key, value) in params {
+            if value.isEmpty {
+                params[key] = valueForKey(key)
+            }
+        }
+        
+        return params
+        
+    }
+    
     public func createDataTask(endPointKey: String, headers: [String: String]? = nil, fileUpload: Bool = false) {
         
-        let params = OAuthEndPoints[endPointKey]!
+        let params = resolveMissingUrlParams(endPointKey)
         
         let queryString = makeURLAndReturnQueryString(params)
         
@@ -114,12 +140,13 @@ public class OAuth1: OAuthClient {
         params["oauth_timestamp"] = "\(timeStamp)"
         params["oauth_version"] = "1.0"
         
-        if OAuthState != .RequestToken {
-            params["oauth_token"] = valueForKey("oauth_token")
-        }
-        
-        if OAuthState == .AuthenticateCode {
+        switch OAuthState {
+        case .AuthenticateCode:
+            params["oauth_token"] = valueForKey("request_oauth_token")
             params["oauth_verifier"] = valueForKey("oauth_verifier")
+        case .AccessToken:
+            params["oauth_token"] = valueForKey("oauth_token")
+        default: break
         }
         
         params["oauth_signature"] = generateSignature(params)
@@ -218,8 +245,12 @@ public class OAuth1: OAuthClient {
         
         var key = valueForKey("oauth_consumer_secret") + "&"
         
-        if OAuthState != .RequestToken {
+        switch OAuthState {
+        case .AuthenticateCode:
+            key += valueForKey("request_oauth_token_secret")
+        case .AccessToken:
             key += valueForKey("oauth_token_secret")
+        default: break
         }
         
         let signatureBaseString = method + "&" + url + "&" + baseString.stringByAddingPercentEncodingWithAllowedCharacters(OAuth1EncodingSet)!
@@ -232,10 +263,30 @@ public class OAuth1: OAuthClient {
         
     }
     
-    private func storeOAuthTokenSecret(response: AnyObject) {
+    private func storeOAuthRequestTokenSecret(response: AnyObject) {
         if let dict = response as? [String: String] {
-            encryptToKeyChain(OAuthServiceName+" token", data: dict["oauth_token"]!, updateIfExist: true)
-            encryptToKeyChain(OAuthServiceName+" secret", data: dict["oauth_token_secret"]!, updateIfExist: true)
+            encryptToKeyChain(OAuthServiceName+"_request_oauth_token", data: dict["oauth_token"]!, updateIfExist: true)
+            encryptToKeyChain(OAuthServiceName+"_request_oauth_token_secret", data: dict["oauth_token_secret"]!, updateIfExist: true)
+        } else {
+            println("failed to store Tokens: \(response)")
+        }
+    }
+    
+    private func storeOAuthTokenSecret(response: AnyObject) {
+        
+        keychainHelper.deleteKey(OAuthServiceName+"_request_oauth_token")
+        keychainHelper.deleteKey(OAuthServiceName+"_request_oauth_token_secret")
+        keychainHelper.deleteKey(OAuthServiceName+"_oauth_verifier")
+        
+        if let dict = response as? [String: String] {
+            
+            for (key, value) in dict {
+                encryptToKeyChain(OAuthServiceName+"_\(key)", data: value)
+            }
+            
+            //  Access user profile
+            createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
+            
         } else {
             println("failed to store Tokens: \(response)")
         }
@@ -243,22 +294,18 @@ public class OAuth1: OAuthClient {
     
     private func storeOAuthVerifier(response: AnyObject) {
         if let dict = response as? [String: String] {
-            //encryptToKeyChain(OAuthServiceName+" token", data: dict["oauth_token"]!, updateIfExist: true)
-            encryptToKeyChain(OAuthServiceName+" verifier", data: dict["oauth_verifier"]!, updateIfExist: true)
+            let key = "oauth_verifier"
+            encryptToKeyChain(OAuthServiceName+"_\(key)", data: dict[key]!, updateIfExist: true)
         } else {
             println("failed to store oauth_verifier: \(response)")
         }
     }
     
     private func valueForKey(key: String) -> String {
-        
         switch key {
         case "oauth_consumer_key": return OAuthServiceKey
         case "oauth_consumer_secret": return OAuthServiceSecret
-        case "oauth_token": return decryptToKeyChain(OAuthServiceName+" token")
-        case "oauth_token_secret": return decryptToKeyChain(OAuthServiceName+" secret")
-        case "oauth_verifier": return decryptToKeyChain(OAuthServiceName+" verifier")
-        default: return ""
+        default: return decryptToKeyChain(OAuthServiceName+"_\(key)")
         }
     }
     
@@ -275,7 +322,7 @@ extension OAuth1: OAuthWebResponse {
             
             // we got the verifier, lets authorize the verifier, to get final credentials
             OAuthState = .AuthenticateCode
-            createDataTask(OAuthEndPointKeys.AuthenticateCodeURL.rawValue)
+            createDataTask(OAuthEndPointKeys.AuthenticateUserCodeForAccessTokenURL.rawValue)
                 
             default: println("response: path:\(path) query:\(query)")
             }
@@ -309,7 +356,9 @@ extension OAuth1: NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
             responseData.removeValueForKey(path)
             
         } else {
-            println("oops no data found, for request: \(task.originalRequest.URL) -> \(error)")
+            if let delgate = delegate {
+                delgate.requestCompleteWithError(OAuthServiceName, path: path, response: responseError[path]!)
+            }
             return
         }
         
@@ -319,7 +368,7 @@ extension OAuth1: NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
         
         switch OAuthState {
         case .RequestToken:
-            storeOAuthTokenSecret(response!)
+            storeOAuthRequestTokenSecret(response!)
             authenticationRequestURL()
         case .AuthenticateCode:
             storeOAuthTokenSecret(response!)

@@ -12,11 +12,11 @@ import Sodium
 public enum OAuthEndPointKeys: String {
     case RequestTokenURL = "requestToken"
     case AuthenticateUserURL = "authenticateUser"
-    case AuthenticateCodeURL = "authenticateCode"
+    case AuthenticateUserCodeForAccessTokenURL = "authenticateCode"
     case RefreshAccessTokenURL = "refreshAuthorizToken"
     case ValidateAccessTokenURL = "validateAuthorizToken"
     case RevokeAccessTokenURL = "revokeAuthorizToken"
-    case UserAccountInfoURL = "profile"
+    case UserProfileURL = "profile"
 }
 
 public enum OAuthClientState {
@@ -54,6 +54,7 @@ public class OAuthClient: NSObject {
     
     var session: NSURLSession!
     var responseData = [String: NSMutableData]()
+    var responseError = [String: String]()
     
     var OAuthState:OAuthClientState = .None
     public weak var delegate: OAuthRequestResponse? = nil
@@ -197,8 +198,11 @@ extension OAuthClient: NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
     
     public func URLSession(session: NSURLSession, dataTask: NSURLSessionDataTask, didReceiveResponse response: NSURLResponse, completionHandler: (NSURLSessionResponseDisposition) -> Void) {
         completionHandler(NSURLSessionResponseDisposition.Allow)
-        //println("\n\(dataTask.originalRequest) \n\n \(response) \n\n \(NSURLResponse.debugDescription())")
         
+        let path = dataTask.originalRequest.URL!.host! + dataTask.originalRequest.URL!.path!
+        
+        responseError[path] = NSURLResponse.debugDescription()
+
     }
     
     public func URLSession(session: NSURLSession, dataTask: NSURLSessionDataTask, didReceiveData data: NSData) {

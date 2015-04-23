@@ -28,21 +28,19 @@ class TwitterService: OAuth1 {
         
         //  Add Default API Endpoints here...
         let requestToken = ["method":"POST", "url":"https://api.twitter.com/oauth/request_token", "format":"&=", "oauth_callback":"https://127.0.0.1:9000/oauth1/twitter/"]
-        let authenticateUser = ["url":"https://api.twitter.com/oauth/authorize"]
-        let authenticateCode = ["method":"POST","url":"https://api.twitter.com/oauth/access_token", "format":"&="]
+        let authenticateUser = ["url":"https://api.twitter.com/oauth/authorize", "oauth_token":""]
+        let authenticateRequestTokenForAccessToken = ["method":"POST","url":"https://api.twitter.com/oauth/access_token", "format":"&="]
 //        let refreshToken = ["method":"POST","url":"https://www.googleapis.com/oauth2/v3/token","client_id":"","client_secret":"","refresh_token":"","grant_type":"refresh_token"]
 //        let validateToken = ["method":"GET","url":"https://www.googleapis.com/oauth2/v1/tokeninfo","access_token":""]
-//        let profile = ["method":"GET", "path":"/about", "access_token":""]
+        let profile = ["method":"GET", "path":"/users/show.json", "screen_name":""]
         
         addEndPoint(OAuthEndPointKeys.RequestTokenURL.rawValue, value: requestToken)
         addEndPoint(OAuthEndPointKeys.AuthenticateUserURL.rawValue, value: authenticateUser)
-        addEndPoint(OAuthEndPointKeys.AuthenticateCodeURL.rawValue, value: authenticateCode)
+        addEndPoint(OAuthEndPointKeys.AuthenticateUserCodeForAccessTokenURL.rawValue, value: authenticateRequestTokenForAccessToken)
 //        addEndPoint(OAuthEndPointKeys.RefreshAccessTokenURL.rawValue, value: refreshToken)
 //        addEndPoint(OAuthEndPointKeys.ValidateAccessTokenURL.rawValue, value: validateToken)
-//        addEndPoint(OAuthEndPointKeys.UserAccountInfoURL.rawValue, value: profile)
+        addEndPoint(OAuthEndPointKeys.UserProfileURL.rawValue, value: profile)
         
-        //  can check the access token we have is valid or not!!
-        // validateAccessToken()
     }
 }
 

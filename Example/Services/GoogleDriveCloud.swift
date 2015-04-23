@@ -34,10 +34,10 @@ class GoogleDriveCloud: OAuth2 {
         let profile = ["method":"GET", "path":"/about", "access_token":""]
         
         addEndPoint(OAuthEndPointKeys.AuthenticateUserURL.rawValue, value: authenticateUser)
-        addEndPoint(OAuthEndPointKeys.AuthenticateCodeURL.rawValue, value: authenticateCode)
+        addEndPoint(OAuthEndPointKeys.AuthenticateUserCodeForAccessTokenURL.rawValue, value: authenticateCode)
         addEndPoint(OAuthEndPointKeys.RefreshAccessTokenURL.rawValue, value: refreshToken)
         addEndPoint(OAuthEndPointKeys.ValidateAccessTokenURL.rawValue, value: validateToken)
-        addEndPoint(OAuthEndPointKeys.UserAccountInfoURL.rawValue, value: profile)
+        addEndPoint(OAuthEndPointKeys.UserProfileURL.rawValue, value: profile)
         
         //  can check the access token we have is valid or not!!
         // validateAccessToken()

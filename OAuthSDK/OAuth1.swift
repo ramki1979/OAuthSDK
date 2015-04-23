@@ -347,19 +347,18 @@ extension OAuth1: NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
         var response: AnyObject?
         let path = task.originalRequest.URL!.host! + task.originalRequest.URL!.path!
         
+        if error != nil {
+            println("\nRequestError: \(responseError[path])")
+            if let delgate = delegate {
+                delgate.requestFailedWithError(OAuthServiceName, path: path, error: error!.description)
+            }
+            
+            return
+        }
+        
         if let data = responseData[path] {
             
-            if error == nil {
-                response = praseResponse(data, format: OAuthResponseParseFormat)
-            } else {
-                response = data.toString()
-            }
-            
-            if OAuthState != .AccessToken {
-                println("\nResponse (bytes: \(task.countOfBytesExpectedToReceive)): \(response)")
-            } else {
-                println("\nResponse (bytes: \(task.countOfBytesExpectedToReceive))")
-            }
+            response = praseResponse(data, format: OAuthResponseParseFormat)
             
             //  Release the NSData response object
             responseData.removeValueForKey(path)
@@ -371,8 +370,14 @@ extension OAuth1: NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
             return
         }
         
-        if error != nil {
+        if response == nil {
             return
+        }
+        
+        if OAuthState != .AccessToken {
+            println("\nResponse (bytes: \(task.countOfBytesExpectedToReceive)): \(response)")
+        } else {
+            println("\nResponse (bytes: \(task.countOfBytesExpectedToReceive))")
         }
         
         switch OAuthState {

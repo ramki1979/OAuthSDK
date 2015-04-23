@@ -36,6 +36,10 @@ public class OAuth1: OAuthClient {
         
         super.init(config: config)
         
+        if keychainHelper.checkAndUpdateValueForKey(OAuthServiceName + "oauth_token") {
+            OAuthState = .AccessToken
+        }
+        
         session = NSURLSession(configuration: nil, delegate: self, delegateQueue: nil)
     }
     
@@ -74,6 +78,10 @@ public class OAuth1: OAuthClient {
     private func resolveMissingUrlParams(endPointKey: String) -> [String: String] {
         
         var params = OAuthEndPoints[endPointKey]!
+        
+        if OAuthState == .AuthenticateUser && params["oauth_token"] != nil {
+            params["oauth_token"] = valueForKey("request_oauth_token")
+        }
         
         for (key, value) in params {
             if value.isEmpty {
@@ -180,7 +188,7 @@ public class OAuth1: OAuthClient {
                     if queryString.isEmpty == false {
                         queryString += "&"
                     }
-                    queryString += "\(encodedKey)=\"\(encodedValue)\""
+                    queryString += "\(encodedKey)=\(encodedValue)"
                     
                 case .OAuthMix:
                     
@@ -197,7 +205,7 @@ public class OAuth1: OAuthClient {
                         if queryString.isEmpty == false {
                             queryString += "&"
                         }
-                        queryString += "\(encodedKey)=\"\(encodedValue)\""
+                        queryString += "\(encodedKey)=\(encodedValue)"
                         
                     }
                 }
@@ -265,8 +273,8 @@ public class OAuth1: OAuthClient {
     
     private func storeOAuthRequestTokenSecret(response: AnyObject) {
         if let dict = response as? [String: String] {
-            encryptToKeyChain(OAuthServiceName+"_request_oauth_token", data: dict["oauth_token"]!, updateIfExist: true)
-            encryptToKeyChain(OAuthServiceName+"_request_oauth_token_secret", data: dict["oauth_token_secret"]!, updateIfExist: true)
+            encryptToKeyChain(OAuthServiceName+"request_oauth_token", data: dict["oauth_token"]!, updateIfExist: true)
+            encryptToKeyChain(OAuthServiceName+"request_oauth_token_secret", data: dict["oauth_token_secret"]!, updateIfExist: true)
         } else {
             println("failed to store Tokens: \(response)")
         }
@@ -274,17 +282,18 @@ public class OAuth1: OAuthClient {
     
     private func storeOAuthTokenSecret(response: AnyObject) {
         
-        keychainHelper.deleteKey(OAuthServiceName+"_request_oauth_token")
-        keychainHelper.deleteKey(OAuthServiceName+"_request_oauth_token_secret")
-        keychainHelper.deleteKey(OAuthServiceName+"_oauth_verifier")
+        keychainHelper.deleteKey(OAuthServiceName+"request_oauth_token")
+        keychainHelper.deleteKey(OAuthServiceName+"request_oauth_token_secret")
+        keychainHelper.deleteKey(OAuthServiceName+"oauth_verifier")
         
         if let dict = response as? [String: String] {
             
             for (key, value) in dict {
-                encryptToKeyChain(OAuthServiceName+"_\(key)", data: value)
+                encryptToKeyChain(OAuthServiceName+"\(key)", data: value)
             }
             
             //  Access user profile
+            OAuthState = .AccessToken
             createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
             
         } else {
@@ -295,7 +304,7 @@ public class OAuth1: OAuthClient {
     private func storeOAuthVerifier(response: AnyObject) {
         if let dict = response as? [String: String] {
             let key = "oauth_verifier"
-            encryptToKeyChain(OAuthServiceName+"_\(key)", data: dict[key]!, updateIfExist: true)
+            encryptToKeyChain(OAuthServiceName+"\(key)", data: dict[key]!, updateIfExist: true)
         } else {
             println("failed to store oauth_verifier: \(response)")
         }
@@ -305,7 +314,7 @@ public class OAuth1: OAuthClient {
         switch key {
         case "oauth_consumer_key": return OAuthServiceKey
         case "oauth_consumer_secret": return OAuthServiceSecret
-        default: return decryptToKeyChain(OAuthServiceName+"_\(key)")
+        default: return decryptToKeyChain(OAuthServiceName+"\(key)")
         }
     }
     

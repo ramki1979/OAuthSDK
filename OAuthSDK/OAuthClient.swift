@@ -77,10 +77,6 @@ public class OAuthClient: NSObject {
             }
         }
         
-        if keychainHelper.checkAndUpdateValueForKey(OAuthServiceName + " token") {
-            OAuthState = .AccessToken
-        }
-        
     }
     
     deinit {

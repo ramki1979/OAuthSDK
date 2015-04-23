@@ -32,8 +32,8 @@ class AccountsTableViewCell: UITableViewCell {
 class ViewController: UIViewController {
     
     let cellIdentifier = "accounts"
-    let icons = ["fa-apple", "fa-google", "fa-dropbox", "fa-twitter", "fa-windows"]
-    let cloudServices = ["iCloud", "Google Drive", "Dropbox", "Twitter", "One Drive"]
+    let icons = ["fa-google", "fa-dropbox", "fa-twitter"]
+    let cloudServices = ["Google Drive", "Dropbox", "Twitter"]
     var serviceSelected:Int = -1
     
     var googleDriveClient: GoogleDriveCloud? = nil
@@ -140,13 +140,11 @@ extension ViewController: UITableViewDelegate {
         serviceSelected = indexPath.row
         
         switch cloudServices[indexPath.row] {
-        case "iCloud": break
         case "Google Drive":
             GoogleDriveOAuth(cloudServices[indexPath.row])
-        case "Dropbox": break
+        case "Dropbox": showAlertView("Dropbox", message: "Haven't Added the service config yet!!")
         case "Twitter":
             TwitterServiceOAuth(cloudServices[indexPath.row])
-        case "One Drive": break
         default: break
         }
     }

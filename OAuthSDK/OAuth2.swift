@@ -12,7 +12,9 @@ public class OAuth2: OAuthClient {
     
     public override init(config: [String : String]) {
         super.init(config: config)
-        
+        if keychainHelper.checkAndUpdateValueForKey(OAuthServiceName + "access_token") {
+            OAuthState = .AccessToken
+        }
         session = NSURLSession(configuration: nil, delegate: self, delegateQueue: nil)
     }
     
@@ -30,7 +32,7 @@ public class OAuth2: OAuthClient {
     
     public func validateAccessToken() -> OAuth2 {
     
-        if keychainHelper.checkAndUpdateValueForKey(OAuthServiceName + " token") {
+        if keychainHelper.checkAndUpdateValueForKey(OAuthServiceName + "access_token") {
             //  check for AccessToken Validation..if not valid automatically refresh access_token
             OAuthState = .ValidateAccessToken
             createDataTask(OAuthEndPointKeys.ValidateAccessTokenURL.rawValue)
@@ -102,11 +104,7 @@ public class OAuth2: OAuthClient {
         switch key {
         case "client_id": return OAuthServiceKey
         case "client_secret": return OAuthServiceSecret
-        case "access_token": return decryptToKeyChain(OAuthServiceName+" token")
-        case "refresh_token": return decryptToKeyChain(OAuthServiceName+" refresh")
-        case "code": return decryptToKeyChain(OAuthServiceName+" code")
-            
-        default: return ""
+        default: return decryptToKeyChain(OAuthServiceName+"\(key)")
         }
     }
     
@@ -126,12 +124,12 @@ public class OAuth2: OAuthClient {
         
         if access_token != nil {
             OAuthState = .AccessToken
-            encryptToKeyChain(OAuthServiceName+" token", data: access_token, updateIfExist: true)
+            encryptToKeyChain(OAuthServiceName+"access_token", data: access_token, updateIfExist: true)
             
             if refresh_token != nil {
                 
-                keychainHelper.deleteKey(OAuthServiceName+" code", serviceId: nil)
-                encryptToKeyChain(OAuthServiceName+" refresh", data: refresh_token)
+                keychainHelper.deleteKey(OAuthServiceName+"code", serviceId: nil)
+                encryptToKeyChain(OAuthServiceName+"refresh_token", data: refresh_token)
                 
                 //  Access user profile
                 createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
@@ -173,7 +171,6 @@ public class OAuth2: OAuthClient {
         
         //  token is valid...
         OAuthState = .AccessToken
-        //createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
     }
     
 }
@@ -189,7 +186,7 @@ extension OAuth2: OAuthWebResponse {
                 if query.hasPrefix("code=") {
                     //  Got oauth_code for google drive service
                     let oauth_code = query.substringWithRange(Range(start: advance(query.startIndex, 5), end: query.endIndex))
-                    encryptToKeyChain(OAuthServiceName+" code", data: oauth_code)
+                    encryptToKeyChain(OAuthServiceName+"code", data: oauth_code)
                     
                     // we got the code, lets authenticate the code, to get the access_token...
                     OAuthState = .AuthenticateCode

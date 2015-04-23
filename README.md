@@ -54,12 +54,10 @@ class TwitterService: OAuth1 {
 ```swift
 
   //  Create instance of the service with service name as title or anything..
-  twitterService = TwitterService(service: title)
-  googleDriveClient = GoogleDriveCloud(service: "Google Drive")
+  twitterService = TwitterService(service: "Twitter")
   
   // call the "authenticationRequestURL" method to start the OAuth flow..
   // OAuthSDK embedded UIWebView will add as a subview to the input view. 
-  googleDriveClient.authenticationRequestURL(self.view)
   twitterService.authenticationRequestURL(self.view)
 
 
@@ -117,8 +115,6 @@ class GoogleDriveCloud: OAuth2 {
 
 ### OAuthSDK communicate API Response to its "OAuthRequestResponse" protocol
 Either Individual service or the MainViewController can confirm to this protocol to get the responses.
-
-#### These are not properly defiend yet.
 
 ```swift
 

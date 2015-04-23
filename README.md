@@ -41,7 +41,7 @@ delegate = self
 let requestToken = ["method":"POST", "url":"https://api.twitter.com/oauth/request_token", "format":"&=", "oauth_callback":"https://127.0.0.1:9000/oauth1/twitter/"]
 let authenticateUser = ["url":"https://api.twitter.com/oauth/authorize", "oauth_token":""]
 let authenticateCode = ["method":"POST","url":"https://api.twitter.com/oauth/access_token", "format":"&="]
-let profile = ["method":"GET", "path":"/users/show.json", "screen_name":""]
+let profile = ["method":"GET", "path":"/users/show.json", "screen_name":"", "format":"json"]
 
 addEndPoint(OAuthEndPointKeys.RequestTokenURL.rawValue, value: requestToken)
 addEndPoint(OAuthEndPointKeys.AuthenticateUserURL.rawValue, value: authenticateUser)

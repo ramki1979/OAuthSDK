@@ -130,9 +130,7 @@ public class OAuth2: OAuthClient {
                 
                 keychainHelper.deleteKey(OAuthServiceName+"code", serviceId: nil)
                 encryptToKeyChain(OAuthServiceName+"refresh_token", data: refresh_token)
-                
-                //  Access user profile
-                createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
+
             }
         }
     }
@@ -242,6 +240,9 @@ extension OAuth2: NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
             
         case .ValidateAccessToken:
             processValidateAccessTokenResponse(response! as! [String: AnyObject])
+            if let delgate = delegate {
+                delgate.requestComplete(OAuthServiceName, path: path, response: response!)
+            }
             
         case .RevokeAccessToken: break
             

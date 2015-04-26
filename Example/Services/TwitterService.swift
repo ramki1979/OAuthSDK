@@ -47,6 +47,10 @@ class TwitterService: OAuth1 {
 extension TwitterService: OAuthRequestResponse {
     func requestComplete(serviceName: String, path: String, response: AnyObject) {
         
+        if state() == OAuthClientState.AccessToken {
+            //  Access user profile
+            createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
+        }
     }
     
     func requestCompleteWithError(serviceName: String, path: String, response: String) {

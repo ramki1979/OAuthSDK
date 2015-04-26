@@ -292,9 +292,9 @@ public class OAuth1: OAuthClient {
                 encryptToKeyChain(OAuthServiceName+"\(key)", data: value)
             }
             
-            //  Access user profile
+            
             OAuthState = .AccessToken
-            createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
+            
             
         } else {
             println("failed to store Tokens: \(response)")

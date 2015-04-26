@@ -47,7 +47,10 @@ class GoogleDriveCloud: OAuth2 {
 
 extension GoogleDriveCloud: OAuthRequestResponse {
     func requestComplete(serviceName: String, path: String, response: AnyObject) {
-        
+        if state() == OAuthClientState.AccessToken {
+            //  Access user profile
+            createDataTask(OAuthEndPointKeys.UserProfileURL.rawValue)
+        }
     }
     
     func requestCompleteWithError(serviceName: String, path: String, response: String) {

@@ -2,9 +2,9 @@
 
 The OAuthSDK [v 0.1] is an iOS > (8.0) Framework that supports both OAuth 1.0a and 2.0. The goals for the framework are below:
 
-1. Any new service should be autoconfigurable, through JSON file.
+1. Any new service should be autoconfigurable, through JSON file or UITableView
 2. Supports libsodium for Encrypting/Decrypting of Data
-3. Realm database support for storing data.
+3. Realm database as Datastore
 
 Currently, the library works for both OAuth 1 & 2, but need to clean things in the framework.
 
